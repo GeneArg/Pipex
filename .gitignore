@@ -1,0 +1,21 @@
+# Ignore files specific to Linux
+*.o
+*.ko
+*.mod.c
+*.mod.o
+*.symvers
+*.order
+*.tmp_versions
+*.ko.cmd
+*.mod
+*.cmd
+*.out
+
+# Ignore files specific to macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+.vscode
+42_pipex_tester
+outfile.txt

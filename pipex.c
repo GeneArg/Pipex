@@ -6,7 +6,7 @@
 /*   By: eagranat <eagranat@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:27:28 by eagranat          #+#    #+#             */
-/*   Updated: 2024/04/08 18:50:59 by eagranat         ###   ########.fr       */
+/*   Updated: 2024/04/09 18:59:51 by eagranat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,13 @@ char	*find_path(char **envp, char *cmd)
 	return (cmd_path);
 }
 
-void	out_process(int fds[2], char *outfile, char *cmd, char **envp)
+int	out_process(int fds[2], char *outfile, char *cmd, char **envp)
 {
 	int fd;
-	int pid;
+	pid_t pid;
 	int execstat;
 	char *path;
+	int status;
 
 	pid = fork();
 	if (pid == -1)
@@ -58,20 +59,36 @@ void	out_process(int fds[2], char *outfile, char *cmd, char **envp)
 			print_error("Outfile error");
 		dup2(fds[0], STDIN_FILENO);
 		dup2(fd, STDOUT_FILENO);
+		if (!*cmd)
+			print_error("Command not found");
 		path = find_path(envp, cmd);
 		if (!path)
 			print_error("Command not found");
 		execstat = execve(path, ft_split(cmd, ' '), envp);
 		if (execstat == -1)
-			print_error("Execve error command failed/not found");
+		{
+			write(STDERR_FILENO, "Execve error command failed / not found\n", 40);
+			return (127);
+		}
 	}
+	else
+	{
+		close(fds[0]);
+		waitpid(pid, &status, 0);
+		if (WIFEXITED(status))
+			return (WEXITSTATUS(status));
+		else
+			return (EXIT_FAILURE);
+	}
+	return (EXIT_SUCCESS);
 }
 
-void	in_process(int fds[2], char *infile, char *cmd, char **envp)
+int	in_process(int fds[2], char *infile, char *cmd, char **envp)
 {
 	int fd;
 	int pid;
 	int execstat;
+	int status;
 	char *path;
 
 	pid = fork();
@@ -90,8 +107,22 @@ void	in_process(int fds[2], char *infile, char *cmd, char **envp)
 			print_error("Command not found");
 		execstat = execve(path, ft_split(cmd, ' '), envp);
 		if (execstat == -1)
-			print_error("Execve error command failed/not found");
+		{
+			write(STDERR_FILENO, "Execve error command failed / not found\n", 40);
+			return (127);
+		}
 	}
+	else
+	{
+		close(fds[1]);
+		waitpid(pid, &status, 0);
+		if (WIFEXITED(status))
+			return (WEXITSTATUS(status));
+		else
+			return (EXIT_FAILURE);
+	
+	}
+	return (EXIT_SUCCESS);
 }
 
 void	print_error(char *str)
@@ -103,15 +134,16 @@ void	print_error(char *str)
 int main(int argc, char **argv, char **envp)
 {
 	int	fds[2];
+	int exit_status;
 
 	if (argc != 5)
 		print_error("Usage format: ./pipex filein cmd1 cmd2 fileout");
 	if (pipe(fds) == -1)
 		print_error("Pipe Error");
-	in_process(fds, argv[1], argv[2], envp);
+	exit_status = in_process(fds, argv[1], argv[2], envp);
 	wait(NULL);
-	out_process(fds, argv[4], argv[3], envp);
+	exit_status = out_process(fds, argv[4], argv[3], envp);
 	close(fds[0]);
 	close(fds[1]);
-	return (0);
+	return (exit_status);
 }
