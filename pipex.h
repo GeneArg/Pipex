@@ -6,23 +6,30 @@
 /*   By: eagranat <eagranat@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:35:50 by eagranat          #+#    #+#             */
-/*   Updated: 2024/04/09 12:04:55 by eagranat         ###   ########.fr       */
+/*   Updated: 2024/04/10 14:12:52 by eagranat         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
 
+# include <errno.h>
 # include <fcntl.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/wait.h>
 # include <unistd.h>
-# include <errno.h>
 
-void	print_error(char *str);
-int	in_process(int fds[2], char *infile, char *cmd, char **envp);
-int	out_process(int fds[2], char *outfile, char *cmd, char **envp);
+void	print_error(char *str, int n);
+void	free_split(char **split);
+// int	in_process(int fds[2], char *infile, char *cmd, char **envp);
+// int	out_process(int fds[2], char *outfile, char *cmd, char **envp);
+int		in_process(int fds[2], char *infile, char *cmd, char **envp);
+int		parent_process_in(int fds[2]);
+void	child_process_in(int fds[2], char *infile, char *cmd, char **envp);
+int		out_process(int fds[2], char *outfile, char *cmd, char **envp);
+int		parent_process_out(int fds[2]);
+void	child_process_out(int fds[2], char *outfile, char *cmd, char **envp);
 char	*find_path(char **envp, char *cmd);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
 char	*ft_strnstr(const char *haystack, const char *needle, size_t len);

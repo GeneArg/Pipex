@@ -4,7 +4,7 @@
 
 NAME        := pipex
 CC        := cc
-FLAGS    := -Wall -Wextra -Werror 
+FLAGS    := -Wall -Wextra -Werror
 ################################################################################
 #                                 PROGRAM'S SRCS                               #
 ################################################################################
@@ -18,6 +18,8 @@ SRCS        :=      pipex.c \
                           ft_strdup.c \
                           ft_strlcpy.c \
                           ft_strlcat.c \
+						  in_process.c \
+						  out_process.c \
                           
 OBJS        := $(SRCS:.c=.o)
 
